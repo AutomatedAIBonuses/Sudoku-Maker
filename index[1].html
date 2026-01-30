@@ -1,0 +1,599 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exclusive Sudoku Maker Bonus - Kevin Fahey</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&amp;family=Open+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-hover: #0f766e;
+            --primary-light: #ccfbf1;
+            --bg-page: #fafaf9;
+            --bg-alt: #f5f5f4;
+            --bg-card: #ffffff;
+            --text-primary: #1c1917;
+            --text-secondary: #44403c;
+            --text-muted: #57534e;
+            --border: #d6d3d1;
+            --border-light: #e7e5e4;
+            --pop-orange: #f97316;
+            --wp-green: #5cb85c;
+            --wp-green-dark: #449d44;
+            --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 32px; --space-6: 48px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 16px;
+            padding-top: 80px; 
+        }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        .container-full { max-width: 100%; }
+        
+        h1, h2, h3, h4 { font-family: 'Lato', sans-serif; color: var(--text-primary); line-height: 1.2; }
+        
+        h1 { font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 900; }
+        h2 { font-size: clamp(1.8rem, 4.5vw, 2.5rem); font-weight: 700; margin-bottom: var(--space-4); text-align: center; }
+        h3 { font-size: clamp(1.4rem, 4vw, 1.8rem); }
+        h4 { font-size: clamp(1.2rem, 3.5vw, 1.5rem); }
+
+        .highlight { color: var(--primary); }
+        
+        /* Sticky Header */
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--text-primary);
+            color: white;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-text { font-size: 1rem; font-weight: 600; }
+        .countdown-timer { font-size: 1.3rem; font-weight: 700; color: var(--pop-orange); }
+
+        /* General Section Styling */
+        .section { padding: var(--space-6) 0; }
+        .section-alt { background: var(--bg-alt); padding: var(--space-6) 0; }
+        
+        /* Hero Section */
+        .hero { text-align: center; padding: 40px 0; }
+        .hero h1 { max-width: 850px; margin: 0 auto var(--space-3); }
+        .subheadline { font-size: 1.35rem; color: var(--text-primary); max-width: 750px; margin: 0 auto; line-height: 1.5; font-weight: 500; }
+        .intro-p { max-width: 700px; margin: var(--space-4) auto 0; font-size: 1.1rem; }
+        .hero-countdown { margin: var(--space-4) auto; background: var(--primary-light); border: 2px dashed var(--primary); border-radius: 12px; padding: var(--space-3); max-width: 500px; }
+        .hero-countdown-label { font-weight: 600; color: var(--text-secondary); }
+        #hero-countdown-timer { font-family: 'Lato', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--primary-hover); letter-spacing: 2px; }
+
+        /* Walkthrough Section (Full Width) */
+        .walkthrough-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+            padding: var(--space-5) var(--space-4);
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
+        }
+        .walkthrough-row .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .walkthrough-row img { 
+            width: 100%; 
+            max-width: 800px; 
+            height: auto; 
+            border-radius: 12px; 
+            margin-bottom: var(--space-4); 
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15); 
+        }
+        .step-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: var(--space-3);
+        }
+        .walkthrough-row h4 { color: var(--text-primary); margin-bottom: var(--space-3); font-size: 1.5rem; }
+        .walkthrough-row p { font-size: 1.1rem; max-width: 700px; }
+
+        /* Bonus Section (Upgraded) */
+        .bonus-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-5);
+        }
+        .bonus-card {
+            background: var(--bg-card);
+            border-left: 5px solid var(--primary);
+            border-radius: 0 12px 12px 0;
+            padding: var(--space-5);
+            display: grid;
+            grid-template-columns: 250px 1fr; /* Image column wider */
+            gap: var(--space-5);
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .bonus-card img {
+            width: 100%;
+            height: 250px; /* Image height increased */
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .bonus-badge {
+            background: var(--primary-light);
+            color: var(--primary-hover);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: var(--space-2);
+        }
+        .bonus-card h4 { margin-bottom: var(--space-2); }
+        .bonus-card p { font-size: 1rem; color: var(--text-secondary); }
+
+        /* Value Stack (Redesigned) */
+        .value-stack-wrapper {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0fdfa 100%);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: var(--space-5);
+            margin-top: var(--space-5);
+        }
+        .value-stack-table { max-width: 600px; margin: var(--space-4) auto 0; }
+        .value-stack-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid rgba(13, 148, 136, 0.2);
+        }
+        .value-stack-row:last-child { border-bottom: none; }
+        .value-stack-item { color: var(--text-secondary); font-size: 1.05rem; flex: 1; padding-right: var(--space-3); }
+        .value-stack-price { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--text-primary); font-size: 1.1rem; }
+        .value-stack-total {
+            border-top: 2px solid var(--primary);
+            margin-top: var(--space-3);
+            padding-top: var(--space-4);
+        }
+        .value-stack-total .value-stack-item { font-weight: 900; color: var(--text-primary); font-size: 1.3rem; }
+        .value-stack-total .value-stack-price { font-size: 1.8rem; color: var(--primary-hover); }
+        
+        /* Coupon & Price Styling */
+        .final-price-wrapper { text-align: center; margin-top: var(--space-5); }
+        .coupon-code {
+            background: #fffbe5;
+            border: 2px dashed var(--pop-orange);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: inline-block;
+            border-radius: 8px;
+            margin-top: var(--space-3);
+        }
+        .coupon-code span {
+            color: var(--pop-orange);
+            user-select: all;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(to bottom, var(--wp-green) 0%, var(--wp-green-dark) 100%);
+            color: white;
+            padding: 22px 50px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(92, 184, 92, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: pulse 1.8s infinite;
+        }
+        .cta-button:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(92, 184, 92, 0.5); }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .cta-wrapper { text-align: center; margin: var(--space-5) 0; }
+        .guarantee-text { font-size: 0.9rem; color: var(--text-muted); margin-top: var(--space-3); }
+        .cta-subtext { font-size: 1.1rem; color: var(--text-primary); max-width: 600px; margin: var(--space-4) auto 0; }
+
+        /* FAQ Section */
+        .faq-item { border-bottom: 1px solid var(--border-light); }
+        .faq-question { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+        .faq-icon { font-size: 1.5rem; color: var(--primary); transition: transform 0.3s; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s, padding 0.3s; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); }
+        .faq-item.active .faq-answer { max-height: 200px; padding-bottom: var(--space-3); }
+        
+        /* Exit-Intent Popup */
+        #exit-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #exit-popup {
+            background: var(--bg-card);
+            padding: var(--space-6);
+            border-radius: 16px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        #exit-popup-overlay.visible { display: flex; }
+        #exit-popup-overlay.visible #exit-popup { transform: scale(1); opacity: 1; }
+        #exit-popup h3 { font-size: 2rem; color: var(--pop-orange); margin-bottom: var(--space-4); }
+        #exit-popup a {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: var(--space-2);
+        }
+        #close-popup {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .footer { text-align: center; padding: 40px 20px; font-size: 0.9rem; color: var(--text-muted); }
+        .footer a { color: var(--text-muted); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            body { padding-top: 95px; }
+            .sticky-header { padding: 12px 15px; }
+            .bonus-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .bonus-card img {
+                width: 100%;
+                max-width: 250px; /* Limit size on mobile */
+                margin: 0 auto;
+                height: auto;
+                aspect-ratio: 1 / 1; /* Keep it square */
+            }
+            .walkthrough-row img { max-width: 100%; }
+        }
+    </style>
+<link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/builder-frame.css"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/fontawesome.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/brands.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/solid.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/autocomplete.css"><script type="text/javascript" src="/builder/dist/iframe/events.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/jquery.min.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/tinymce/tinymce.min.js" builder-helper="true"></script><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"><link rel="stylesheet" href="/builder/dist/iframe/beeform.css"><script type="text/javascript" src="/builder/dist/iframe/beeform.js"></script><link rel="stylesheet" type="text/css" id="u0" href="https://virox.isolic.net/builder/dist/iframe/tinymce/skins/ui/oxide-dark/skin.min.css"><link rel="stylesheet" type="text/css" id="u1" href="https://virox.isolic.net/builder/dist/iframe/tinymce/skins/ui/oxide-dark/content.inline.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/builder-frame.css"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/fontawesome.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/brands.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/solid.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/autocomplete.css"><script type="text/javascript" src="/builder/dist/iframe/events.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/jquery.min.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/tinymce/tinymce.min.js" builder-helper="true"></script><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/builder-frame.css"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/fontawesome.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/brands.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/solid.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/autocomplete.css"><script type="text/javascript" src="/builder/dist/iframe/events.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/jquery.min.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/tinymce/tinymce.min.js" builder-helper="true"></script><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/builder-frame.css"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link builder-helper="true" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/fontawesome.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/brands.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/fontawesome-free/css/solid.min.css"><link builder-helper="true" rel="stylesheet" href="/builder/dist/iframe/autocomplete.css"><script type="text/javascript" src="/builder/dist/iframe/events.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/jquery.min.js" builder-helper="true"></script><script type="text/javascript" src="/builder/dist/iframe/tinymce/tinymce.min.js" builder-helper="true"></script></head>
+<body data-new-gr-c-s-check-loaded="14.1271.0" data-gr-ext-installed="" spellcheck="false" data-new-gr-c-s-loaded="14.1271.0">
+
+    <!-- Exit-Intent Popup -->
+    <div id="exit-popup-overlay" class="" style="" spellcheck="false"><div id="exit-popup" class="" style="position: relative;" spellcheck="false"><span id="close-popup" class="" spellcheck="false">×</span>
+<h3 class="">WAIT! Before You Go...</h3>
+<p class="">Don't miss your chance to create a KDP empire. Use code <strong style="color: var(--pop-orange);" class="">SUDOKU20</strong> for $20 off!</p>
+<a href="https://warriorplus.com/o2/a/g0hw704/0" target="_blank" class="" id="mce_6" style="position: relative;" spellcheck="false" rel="noopener">Claim Your $20 Discount &amp; Bonuses!</a><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: auto; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: auto; --rem: 16;"></grammarly-extension></div></div>
+
+    <!-- Sticky Header Bar -->
+    <div class="sticky-header">
+        <div class="header-content" id="mce_0" style="position: relative;" spellcheck="false"><div class="header-text"><strong>LIMITED TIME:</strong> Use Coupon <strong style="color: var(--pop-orange);">SUDOKU20</strong> For <strong style="color: var(--pop-orange);">$20 OFF!</strong> Offer Ends In:<br><br></div></div>
+    </div>
+
+    <div class="container">
+        <!-- Main Headline & Introduction -->
+        <section class="hero builder-class-element-selected" id="mce_7" style="position: relative;" spellcheck="false"><h1 class="">DON'T Buy Sudoku Maker Without This...</h1>
+<p class="subheadline">Get 5 FREE Bonuses from <span class="highlight">Kevin Fahey</span> to Turn Your Puzzle Books into a Profitable KDP Business!</p>
+<grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: auto; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: auto; --rem: 16;"></grammarly-extension>
+<p class="intro-p" id="mce_9" style="position: relative;" spellcheck="false">You've seen how powerful Sudoku Maker is. It's the perfect tool to create professional puzzle books in minutes. But a great tool is only half the story. This exclusive bonus pack is the strategic roadmap you need to ensure the books you create actually get discovered, bought, and build you a real, passive income stream on Amazon.</p>
+<div class="cta-wrapper"><a href="https://warriorplus.com/o2/a/g0hw704/0" class="cta-button" target="_blank" rel="noopener" id="mce_11" style="position: relative;" spellcheck="false">Get Sudoku Maker &amp; All My Bonuses Now!</a>
+<p class="guarantee-text">Use Coupon: SUDOKU20 For $20 OFF! &nbsp;&nbsp;|&nbsp;&nbsp; 30-Day Money-Back Guarantee</p>
+</div>
+<grammarly-extension-vbars data-grammarly-shadow-root="true" class="dnXmp" style="display: contents; --rem: 16;"></grammarly-extension-vbars></section>
+    </div>
+
+    <!-- The Problem -->
+    <div class="section-alt">
+        <div class="container">
+            <h2 class="">Sudoku Maker Solves the 'Tech Nightmare'... But That's Only Half the Battle.</h2>
+            <p class="intro-p" style="text-align:center;">The sales page showed you how Sudoku Maker eliminates the biggest frustrations of KDP publishing: the technical formatting, the complex puzzle algorithms, and the tedious manual work. It's the perfect tool, but a tool without a strategy still gathers dust. You also need to know how to find buyers, rank your books, and turn a single sale into a long-term customer.</p>
+        </div>
+    </div>
+
+    <!-- The Solution Part 1: Product Walkthrough -->
+    <section class="section container-full">
+        <div class="container">
+            <h2 class="">Here’s How Sudoku Maker Makes Book Creation Effortless...</h2>
+        </div>
+        <div class="walkthrough-row">
+            <div class="container">
+                <span class="step-badge">Step 1</span>
+                <h4>Name Your Book</h4>
+                <img src="https://kevinsfreegift.com/SudokuMakerBonus/step1.jpg" alt="Step 1: Book Basics" class="">
+                <p class="">Enter your title, subtitle, and author name. Choose how many puzzles you want... anywhere from a handful to 500 per book. This is your keyword opportunity. The title that shows up on Amazon. Make it clear, make it searchable, make it yours.</p>
+            </div>
+        </div>
+        <div class="walkthrough-row section-alt">
+            <div class="container">
+                <span class="step-badge">Step 2</span>
+                <h4>Pick Your Size</h4>
+                <img src="https://kevinsfreegift.com/SudokuMakerBonus/step2.jpg" alt="Step 2: Pick Your Size" class="">
+                <p class="">Four KDP-approved trim sizes. From compact 6×9 travel editions to large print 8.5×11 for seniors. Match your book size to your market. Large print sells to seniors. Compact sells to travelers. The choice is yours.</p>
+            </div>
+        </div>
+        <div class="walkthrough-row">
+            <div class="container">
+                <span class="step-badge">Step 3</span>
+                <h4>Choose Your Puzzles</h4>
+                <img src="https://kevinsfreegift.com/SudokuMakerBonus/step3.jpg" alt="Step 3: Choose Your Puzzles" class="">
+                <p>Five puzzle types. Six difficulty levels. Use presets for quick setup or dial in exact distributions. Each puzzle type is a different market. Each difficulty level is a different audience. Mix and match or focus tight... your call.</p>
+            </div>
+        </div>
+        <div class="walkthrough-row section-alt">
+            <div class="container">
+                <span class="step-badge">Step 4</span>
+                <h4>Set Your Density</h4>
+                <img src="https://kevinsfreegift.com/SudokuMakerBonus/step4.jpg" alt="Step 4: Set Your Density" class="">
+                <p>One puzzle per page for maximum comfort. Or pack them tighter for value-focused books. Solutions get their own density setting. The live page count updates as you adjust. No guessing. No surprises when you export.</p>
+            </div>
+        </div>
+        <div class="walkthrough-row">
+            <div class="container">
+                <span class="step-badge">Step 5</span>
+                <h4>Export Your Book</h4>
+                <img src="https://kevinsfreegift.com/SudokuMakerBonus/step5.jpg" alt="Step 5: Export Your Book" class="">
+                <p>Add your final polish with header styles and corner options, then one click is all it takes. Your complete, KDP-ready PDF with everything included is ready to upload. It's truly that simple.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Centered CTA Section -->
+    <section class="section" style="text-align: center;">
+        <div class="container">
+            <h2>Ready to Start Your KDP Empire?</h2>
+            <p class="cta-subtext">You've seen how easy it is to create professional puzzle books. Now it's time to take action and combine this powerful tool with a proven strategy for success.</p>
+            <div class="cta-wrapper" id="mce_13" style="position: relative;" spellcheck="false"><a href="https://warriorplus.com/o2/a/g0hw704/0" class="cta-button" target="_blank" id="mce_12" style="position: relative;" spellcheck="false" rel="noopener">Yes! I Want Sudoku Maker + My Bonuses!</a><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: auto; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: auto; --rem: 16;"></grammarly-extension>
+<p class="guarantee-text">Remember to use coupon <strong>SUDOKU20</strong> at checkout to save $20!</p></div>
+        </div>
+    </section>
+
+    <!-- The Solution Part 2: Your Exclusive Bonuses -->
+    <section class="section section-alt">
+        <div class="container">
+            <h2 class="">And Here's How I'll Make Sure Your Books Actually SELL...</h2>
+            <p class="intro-p" style="text-align:center;">This is my exclusive bonus package, valued at $455, available only through my link for a limited time. This is the strategic engine your new software needs to start generating real profits.</p>
+            <div class="bonus-grid" style="margin-top:var(--space-5);">
+                <div class="bonus-card">
+                    <img src="https://kevinsfreegift.com/SudokuMakerBonus/b1.png" alt="KDP AI Coach">
+                    <div>
+                        <span class="bonus-badge">Exclusive Bonus #1 - Value: $197</span>
+                        <h4>The KDP AI Coach</h4>
+                        <p>Imagine having a KDP expert on call 24/7. This AI-trained coach gives you battle-tested strategies for driving traffic, generating sales, and maximizing profits. Ask it anything from "What's a hot niche for Q4?" to "Write me a high-converting book description," and get expert answers instantly.</p>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <img src="https://kevinsfreegift.com/SudokuMakerBonus/b2.png" alt="Sudoku Keyword Goldmine">
+                    <div>
+                        <span class="bonus-badge">Bonus #2 - Value: $97</span>
+                        <h4 class="">The Sudoku Keyword Goldmine</h4>
+                        <p class="">Don't just publish your books—make them discoverable. This guide is your treasure map to over 100+ high-volume, low-competition keywords that customers are actively searching for. It’s the difference between landing on page one and being buried on page fifty.</p>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <img src="https://kevinsfreegift.com/SudokuMakerBonus/b3.png" alt="Sudoku Niche Dominator Guide">
+                    <div>
+                        <span class="bonus-badge">Bonus #3 - Value: $67</span>
+                        <h4 class="">The Sudoku Niche Dominator Guide</h4>
+                        <p class="">The secret to KDP isn't competing with everyone; it's dominating a specific audience. This blueprint gives you a step-by-step plan to conquer three highly profitable, underserved Sudoku niches that your competition has completely ignored.</p>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <img src="https://kevinsfreegift.com/SudokuMakerBonus/b4.png" alt="Holiday &amp; Seasonal Sudoku Profits Plan">
+                    <div>
+                        <span class="bonus-badge">Bonus #4 - Value: $47</span>
+                        <h4>Holiday &amp; Seasonal Sudoku Profits Plan</h4>
+                        <p>Learn to ride the predictable waves of seasonal buyer traffic. This 12-month marketing calendar shows you exactly when to launch themed books for holidays like Christmas, Father's Day, and Summer Vacation to capture massive sales spikes year-round.</p>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <img src="https://kevinsfreegift.com/SudokuMakerBonus/b5.png" alt="Sudoku Series Success Blueprint">
+                    <div>
+                        <span class="bonus-badge">Bonus #5 - Value: $47</span>
+                        <h4>The Sudoku Series Success Blueprint</h4>
+                        <p>Selling one book is a transaction; selling a series is a business. This guide reveals the strategy for planning, branding, and cross-promoting a book series to turn one-time buyers into a loyal fanbase that buys every book you release.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="section" id="mce_15" style="position: relative;" spellcheck="false"><div class="container">
+<h2 class="">Get Over $750 in Total Value for a Tiny One-Time Price!</h2>
+<p class="cta-subtext">When you combine the power of the Sudoku Maker software with my exclusive strategic bonus pack, you have a complete, step-by-step system for building a real KDP publishing business.</p>
+<div class="value-stack-wrapper">
+<h3 style="text-align: center;">Here's A Quick Recap Of Everything You Get:</h3>
+<div class="value-stack-table">
+<div class="value-stack-row"><span class="value-stack-item">Sudoku Maker Software</span><span class="value-stack-price">$197 Value</span></div>
+<div class="value-stack-row"><span class="value-stack-item"><strong>Bonus #1: KDP AI Coach</strong></span><span class="value-stack-price"><strong>$197 Value</strong></span></div>
+<div class="value-stack-row"><span class="value-stack-item">Bonus #2: Keyword Goldmine</span><span class="value-stack-price">$97 Value</span></div>
+<div class="value-stack-row"><span class="value-stack-item">Bonus #3: Niche Dominator Guide</span><span class="value-stack-price">$67 Value</span></div>
+<div class="value-stack-row"><span class="value-stack-item">Bonus #4: Holiday Profits Plan</span><span class="value-stack-price">$47 Value</span></div>
+<div class="value-stack-row"><span class="value-stack-item">Bonus #5: Series Success Blueprint</span><span class="value-stack-price">$47 Value</span></div>
+<div class="value-stack-row value-stack-total"><span class="value-stack-item">Total Value</span><span class="value-stack-price">$652.00</span></div>
+</div>
+<div class="final-price-wrapper">
+<p class="cta-subtext">Apply the coupon below at checkout to get an <span class="highlight"><strong>INSTANT $20 DISCOUNT!</strong></span></p>
+<div class="coupon-code">Your Coupon Code: <span>SUDOKU20</span></div>
+</div>
+</div>
+<div class="cta-wrapper"><a href="https://warriorplus.com/o2/a/g0hw704/0" class="cta-button" target="_blank" id="mce_14" style="position: relative;" spellcheck="false" rel="noopener">Click Here to Get Sudoku Maker &amp; Your FREE Bonuses Now!</a>
+<p class="guarantee-text">Backed by a 30-Day No-Questions-Asked Money-Back Guarantee</p>
+</div>
+</div></section>
+
+    <!-- FAQ Section -->
+    <section class="section section-alt">
+        <div class="container">
+            <h2 class="">Frequently Asked Questions</h2>
+            <div class="faq-container" style="max-width: 750px; margin: 40px auto 0;">
+                <div class="faq-item">
+                    <button class="faq-question"><span>How do I get my bonuses?</span><span class="faq-icon">+</span></button>
+                    <div class="faq-answer">
+                        <p>Your bonuses will be delivered automatically inside your WarriorPlus account after you purchase Sudoku Maker through my affiliate link. You'll find a button to access them right below your product access link.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question"><span>Is this bonus package *really* free?</span><span class="faq-icon">+</span></button>
+                    <div class="faq-answer">
+                        <p>Absolutely. This entire 5-bonus package, valued at $455, is my gift to you for purchasing Sudoku Maker through my affiliate link. There are no extra costs or hidden fees.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question"><span>What if I'm a complete beginner at KDP?</span><span class="faq-icon">+</span></button>
+                    <div class="faq-answer">
+                        <p>This package is perfect for you. Sudoku Maker handles the technical creation, and my bonuses provide the marketing and sales strategies you need to start making money, even if you're starting from scratch.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question"><span>Can the AI Coach help with things other than Sudoku books?</span><span class="faq-icon">+</span></button>
+                    <div class="faq-answer">
+                        <p>Yes! While tailored for this launch, the KDP AI Coach is trained on broad KDP success principles. Its advice on keywords, niche research, and profit planning can be applied to any type of low-content or no-content book you want to publish on Amazon.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question"><span>Is Kevin Fahey offering this bonus anywhere else?</span><span class="faq-icon">+</span></button>
+                    <div class="faq-answer">
+                        <p>No. This is a private, exclusive bonus package that I have put together specifically for people who purchase Sudoku Maker through my affiliate link during this limited launch period.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="">
+            <a href="https://resultswithkevin.com/privacy.html" target="_blank">Privacy Policy</a> | 
+            <a href="https://resultswithkevin.com/terms.html" target="_blank">Terms</a> | 
+            <a href="https://resultswithkevin.com/disclaimer.html" target="_blank">Disclaimer</a>
+        </p>
+        <p style="margin-top: 8px;" class="">   <a href="https://bonusbuilderai.convertri.com/" target="_blank">Powered by Bonus Builder AI</a>
+</p>
+    </footer>
+
+    <script>
+        // Countdown Timers
+        (function() {
+            const endDate = new Date('2026-01-31T23:59:59-05:00').getTime();
+            const stickyTimerEl = document.getElementById('countdown-timer-sticky');
+            const heroTimerEl = document.getElementById('hero-countdown-timer');
+
+            function updateTimers() {
+                const now = new Date().getTime();
+                const diff = endDate - now;
+
+                if (diff <= 0) {
+                    stickyTimerEl.textContent = 'Offer Expired';
+                    heroTimerEl.textContent = 'Offer Expired';
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                const timerString = `${days}d : ${hours.toString().padStart(2, '0')}h : ${minutes.toString().padStart(2, '0')}m : ${seconds.toString().padStart(2, '0')}s`;
+                
+                stickyTimerEl.textContent = timerString;
+                heroTimerEl.textContent = timerString;
+            }
+            
+            updateTimers();
+            setInterval(updateTimers, 1000);
+        })();
+
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const faqItem = button.parentElement;
+                faqItem.classList.toggle('active');
+            });
+        });
+
+        // Exit-Intent Popup
+        (function() {
+            const popupOverlay = document.getElementById('exit-popup-overlay');
+            const closeButton = document.getElementById('close-popup');
+            let popupShown = false;
+
+            const showPopup = () => {
+                if (popupShown) return;
+                popupOverlay.classList.add('visible');
+                popupShown = true;
+            };
+
+            const hidePopup = () => {
+                popupOverlay.classList.remove('visible');
+            };
+
+            const handleMouseOut = (e) => {
+                if (e.clientY <= 0 || e.relatedTarget === null) {
+                    showPopup();
+                }
+            };
+            
+            document.addEventListener('mouseout', handleMouseOut, {once: false});
+            closeButton.addEventListener('click', hidePopup);
+            popupOverlay.addEventListener('click', (e) => {
+                if(e.target === popupOverlay) {
+                    hidePopup();
+                }
+            });
+        })();
+    </script>
+
+<grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></body></html>
